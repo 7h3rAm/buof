@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+## check  https://github.com/evets007/BOF-SemiAutomatic and update as necessary
+
 import re
 import sys
 import random
