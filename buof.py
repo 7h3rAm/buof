@@ -123,7 +123,7 @@ class BUOF:
         self.sendrecv(fuzbuf)
         print()
         if random.randint(0,5) == 3:
-          raise Exception("crash!")
+          raise Exception("crashed!")
       except:
         print("[+] possible crash @ fuzbuf size %dB" % (bufsize))
         print("[+] rerun with '--opcode offset --eipvalue <eipvalue>' arguments to find EIP offset")
